@@ -169,6 +169,7 @@ RUN cd /tmp && mkdir -p imagick \
     )\
     && rm -r imagick
 
+RUN /opt/php/bin/pecl install redis
 
 RUN sed -i '/^listen = /clisten = 0.0.0.0:9000' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^listen.allowed_clients/c;listen.allowed_clients =' /opt/php/etc/php-fpm.conf
@@ -178,6 +179,9 @@ RUN sed -i '/^pm.max_children/cpm.max_children = 16' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^;date.timezone =/cdate.timezone = Asia/Shanghai' /opt/php/etc/php.ini
 RUN sed -i '/^display_errors =/cdisplay_errors = On' /opt/php/etc/php.ini
 RUN sed -i '/^display_startup_errors =/cdisplay_startup_errors = On' /opt/php/etc/php.ini
+RUN echo '[opcache]' >> /opt/php/etc/php.ini
+RUN echo 'zend_extension=opcache.so' >> /opt/php/etc/php.ini
+RUN echo 'extension=redis.so' >> /opt/php/etc/php.ini
 
 EXPOSE 9000
 ENTRYPOINT /opt/php/sbin/php-fpm -R --nodaemonize
