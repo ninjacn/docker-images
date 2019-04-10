@@ -48,6 +48,7 @@ RUN cd /tmp && mkdir -p php_src \
     )
 
 RUN /opt/php/bin/pecl install redis
+RUN /opt/php/bin/pecl install imagick
 
 RUN ln -s /opt/php/bin/php /usr/bin/php \
     && cp /opt/php/etc/php-fpm.conf.default /opt/php/etc/php-fpm.conf \
@@ -71,6 +72,7 @@ RUN sed -i '/^display_startup_errors =/cdisplay_startup_errors = On' /opt/php/et
 RUN echo '[opcache]' >> /opt/php/etc/php.ini
 RUN echo 'zend_extension=opcache.so' >> /opt/php/etc/php.ini
 RUN echo 'extension=redis.so' >> /opt/php/etc/php.ini
+RUN echo 'extension=imagick.so' >> /opt/php/etc/php.ini
 
 EXPOSE 9000
 ENTRYPOINT /opt/php/sbin/php-fpm -R --nodaemonize
