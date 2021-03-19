@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apm
+  namespace: yaopengming
+  labels:
+    app: apm-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apm-web
+  template:
+    metadata:
+      labels:
+        app: apm-web
+    spec:
+      containers:
+      - name: openresty
+        image: openresty/openresty:buster
+        volumeMounts:
+          - mountPath: /var/www/html
+            name: web-rootpath 
+          - mountPath: /etc/nginx/conf.d/default.conf
+            name: nginx-vh-config
+            subPath: default.conf
+      - name: php-fpm
+        image: ninjacn/laravel-fpm-7.4
+        volumeMounts:
+          - mountPath: /var/www/html
+            name: web-rootpath 
+      volumes:
+        - name: web-rootpath
+          hostPath:
+            path: /www1/site/workspace/99/apm
+        - name: nginx-vh-config
+          configMap:
+            name: nginx-vh-config
+            items:
+              - key: default.conf
+                path: default.conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apm-service-web
+  namespace: yaopengming
+spec:
+  selector:
+    app: apm-web
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 11111
