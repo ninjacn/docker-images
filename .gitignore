@@ -1,1 +1,2 @@
-docker-php-fpm-5.5/
+*.gz
+*.tgz
