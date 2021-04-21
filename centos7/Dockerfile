@@ -1,5 +1,6 @@
 FROM centos:7
 MAINTAINER "ninjacn" <x@ninjacn.com>
+#docker build -t ninjacn/centos7:latest .
 
 RUN \
 	yum -y update && \

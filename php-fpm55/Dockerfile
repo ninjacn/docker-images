@@ -1,5 +1,6 @@
-FROM centos:6
+FROM ninjacn/centos7:latest
 MAINTAINER "ninjacn" <x@ninjacn.com>
+#docker build -t registry.cn-beijing.aliyuncs.com/yaopengming/php-fpm-5.5:latest .
 
 RUN \
 	yum -y update && \
@@ -85,10 +86,10 @@ RUN yum -y update && \
     #)\
     #&& rm -r image-exiftool
 
-ADD ./files/ImageMagick-6.5.4-10.tar.xz /tmp/
+COPY ./files/ImageMagick-6.9.12-8.tar.xz /tmp/
 RUN cd /tmp && mkdir -p imagemagick \
-    && tar -xf ImageMagick-6.5.4-10.tar.xz -C imagemagick --strip-components=1 \
-    && rm ImageMagick-6.5.4-10.tar.xz \
+    && tar -xf ImageMagick-6.9.12-8.tar.xz -C imagemagick --strip-components=1 \
+    && rm ImageMagick-6.9.12-8.tar.xz \
     && ( \
         cd imagemagick \
         && ./configure \
@@ -97,10 +98,10 @@ RUN cd /tmp && mkdir -p imagemagick \
     )\
     && rm -r imagemagick
 
-COPY ./files/php-5.5.10.tar.gz /tmp/
+COPY ./files/php-5.5.38.tar.gz /tmp/
 RUN cd /tmp && mkdir -p php55 \
-    && tar -zxf php-5.5.10.tar.gz -C php55 --strip-components=1 \
-    && rm php-5.5.10.tar.gz \
+    && tar -zxf php-5.5.38.tar.gz -C php55 --strip-components=1 \
+    && rm php-5.5.38.tar.gz \
     && ( \
         cd php55 \
         && ./configure \
@@ -150,9 +151,9 @@ RUN ln -s /opt/php/bin/php /usr/bin/php \
     && cp php.ini-production /opt/php/etc/php.ini \
     && rm -rf /tmp/php55
 
-RUN curl -sS https://getcomposer.org/installer | /opt/php/bin/php && \
-	mv composer.phar /usr/local/bin/composer && \
-	composer self-update
+#RUN curl -sS https://getcomposer.org/installer | /opt/php/bin/php && \
+	#mv composer.phar /usr/local/bin/composer && \
+	#composer self-update
 
 RUN yum install telnet re2c -y
 COPY ./files/imagick-3.1.2.tgz /tmp/
@@ -169,19 +170,38 @@ RUN cd /tmp && mkdir -p imagick \
     )\
     && rm -r imagick
 
-RUN /opt/php/bin/pecl install redis
+#RUN /opt/php/bin/pecl install redis
+COPY ./files/redis-3.1.6.tgz /tmp/
+RUN cd /tmp && mkdir -p redis \
+    && tar -zxf redis-3.1.6.tgz -C redis --strip-components=1 \
+    && rm redis-3.1.6.tgz \
+    && ( \
+        cd redis \
+        && /opt/php/bin/phpize \
+        && ./configure --with-php-config=/opt/php/bin/php-config \
+        && make \
+        && make install \
+        && echo 'extension=redis.so' >> /opt/php/etc/php.ini \
+    )\
+    && rm -r redis
 
-RUN sed -i '/^listen = /clisten = 0.0.0.0:9000' /opt/php/etc/php-fpm.conf
+# php-fpm.conf
+RUN sed -i '/^listen = /clisten = 127.0.0.1:9000' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^listen.allowed_clients/c;listen.allowed_clients =' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^user =/cuser = root' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^group =/cgroup = root' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^pm.max_children/cpm.max_children = 16' /opt/php/etc/php-fpm.conf
+RUN sed -i '/^;error_log =/cerror_log = /tmp/php-fpm.log' /opt/php/etc/php-fpm.conf
+
+# php.ini
 RUN sed -i '/^;date.timezone =/cdate.timezone = Asia/Shanghai' /opt/php/etc/php.ini
 RUN sed -i '/^display_errors =/cdisplay_errors = On' /opt/php/etc/php.ini
 RUN sed -i '/^display_startup_errors =/cdisplay_startup_errors = On' /opt/php/etc/php.ini
 RUN echo '[opcache]' >> /opt/php/etc/php.ini
 RUN echo 'zend_extension=opcache.so' >> /opt/php/etc/php.ini
-RUN echo 'extension=redis.so' >> /opt/php/etc/php.ini
+
+STOPSIGNAL SIGQUIT
 
 EXPOSE 9000
+#CMD ["/opt/php/sbin/php-fpm", "-R"]
 ENTRYPOINT /opt/php/sbin/php-fpm -R --nodaemonize
