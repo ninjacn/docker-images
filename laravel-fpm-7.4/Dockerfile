@@ -88,6 +88,14 @@ RUN composer global require "squizlabs/php_codesniffer=*"
 RUN apk add --no-cache \
     busybox-extras
 
+# Install PECL and PEAR extensions
+RUN pecl install \
+    mongodb
+
+# Enable PECL and PEAR extensions
+RUN docker-php-ext-enable \
+    mongodb
+
 # Cleanup dev dependencies
 RUN apk del -f .build-deps
 

@@ -61,7 +61,7 @@ RUN curl -sS https://getcomposer.org/installer | /opt/php/bin/php && \
 	mv composer.phar /usr/local/bin/composer && \
 	composer self-update
 
-RUN sed -i '/^listen = /clisten = 0.0.0.0:9000' /opt/php/etc/php-fpm.d/www.conf
+RUN sed -i '/^listen = /clisten = 127.0.0.1:9000' /opt/php/etc/php-fpm.d/www.conf
 RUN sed -i '/^listen.allowed_clients/c;listen.allowed_clients =' /opt/php/etc/php-fpm.d/www.conf
 RUN sed -i '/^user =/cuser = root' /opt/php/etc/php-fpm.d/www.conf
 RUN sed -i '/^group =/cgroup = root' /opt/php/etc/php-fpm.d/www.conf
