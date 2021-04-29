@@ -185,6 +185,13 @@ RUN cd /tmp && mkdir -p redis \
     )\
     && rm -r redis
 
+# Install composer
+ENV COMPOSER_HOME /composer
+ENV PATH ./vendor/bin:/composer/vendor/bin:$PATH
+ENV COMPOSER_ALLOW_SUPERUSER 1
+RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
+RUN composer config -g repos.packagist composer https://mirrors.cloud.tencent.com/composer/
+
 # php-fpm.conf
 RUN sed -i '/^listen = /clisten = 127.0.0.1:9000' /opt/php/etc/php-fpm.conf
 RUN sed -i '/^listen.allowed_clients/c;listen.allowed_clients =' /opt/php/etc/php-fpm.conf
@@ -197,6 +204,7 @@ RUN sed -i '/^;error_log =/cerror_log = /tmp/php-fpm.log' /opt/php/etc/php-fpm.c
 RUN sed -i '/^;date.timezone =/cdate.timezone = Asia/Shanghai' /opt/php/etc/php.ini
 RUN sed -i '/^display_errors =/cdisplay_errors = On' /opt/php/etc/php.ini
 RUN sed -i '/^display_startup_errors =/cdisplay_startup_errors = On' /opt/php/etc/php.ini
+RUN sed -i '/^error_reporting =/cerror_reporting = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED' /opt/php/etc/php.ini
 RUN echo '[opcache]' >> /opt/php/etc/php.ini
 RUN echo 'zend_extension=opcache.so' >> /opt/php/etc/php.ini
 

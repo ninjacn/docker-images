@@ -1,7 +1,7 @@
 FROM php:7.2-fpm-alpine
 MAINTAINER "ninjacn" <x@ninjacn.com>
 # e.g. docker build -t ninjacn/laravel-fpm-7.4 .
-# e.g. docker build -t registry.cn-beijing.aliyuncs.com/pengmingtech/laravel-fpm-7.4 .
+# e.g. docker build -t registry.cn-beijing.aliyuncs.com/yaopengming/laravel-fpm-7.2 .
 
 # Install dev dependencies
 RUN apk add --no-cache --virtual .build-deps \
@@ -90,10 +90,6 @@ RUN apk add --no-cache \
 
 # Cleanup dev dependencies
 RUN apk del -f .build-deps
-
-# Install php extensions
-RUN docker-php-ext-install \
-    zookeeper \
 
 # Setup working directory
 WORKDIR /var/www/html
