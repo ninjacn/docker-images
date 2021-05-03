@@ -75,6 +75,10 @@ RUN docker-php-ext-install \
     xml \
     zip
 
+# Install php extensions
+RUN docker-php-ext-install \
+    mysqli
+
 
 # Install composer
 ENV COMPOSER_HOME /composer
